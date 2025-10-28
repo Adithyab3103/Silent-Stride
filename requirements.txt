@@ -1,0 +1,8 @@
+osmnx
+networkx
+geopandas
+shapely
+PyQt5
+PyQtWebEngine
+folium
+geopy
