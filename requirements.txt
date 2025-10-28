@@ -6,3 +6,8 @@ PyQt5
 PyQtWebEngine
 folium
 geopy
+pandas
+numpy
+fiona
+pyproj
+rtree
