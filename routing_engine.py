@@ -101,6 +101,7 @@ class RoutingEngine:
             current_hour = datetime.now().hour
             print(f"Using current system hour: {current_hour}:00")
 
+        # Updated Quiet Hours: 0-7 AM, 10-11 AM, 3-4 PM (15-16), 10-11 PM (22-23)
         is_quiet_hours = (0 <= current_hour <= 7) or \
                          (10 <= current_hour <= 11) or \
                          (15 <= current_hour <= 16) or \
@@ -130,14 +131,25 @@ class RoutingEngine:
         total_length_m = 0.0
         time_in_green = 0.0
         
+        # --- THIS IS THE FIX ---
+        # Determine the noise multiplier for analytics based on the hour
+        analytics_noise_multiplier = 1.0 # Default (for Normal Hours)
+        if is_quiet_hours:
+            analytics_noise_multiplier = 0.7 # 30% reduction for Quiet Hours
+            print("...Applying 30% noise reduction to analytics due to Quiet Hours.")
+        # --- END OF FIX ---
+        
         for u, v in path_edges:
             edge_data = self.G.get_edge_data(u, v)[0]
             current_time = float(edge_data.get('time_cost', 0.0))
             current_noise = float(edge_data.get('noise_cost', 0.0))
             current_length = float(edge_data.get('length', 0.0))
+            
             total_time_sec += current_time
-            total_noise_weighted += current_noise
+            # --- Apply the multiplier to the noise score before summing ---
+            total_noise_weighted += (current_noise * analytics_noise_multiplier)
             total_length_m += current_length
+            
             if _is_truthy(edge_data.get('green_cover')):
                 time_in_green += current_time
         
